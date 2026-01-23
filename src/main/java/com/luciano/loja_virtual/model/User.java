@@ -1,75 +1,71 @@
 package com.luciano.loja_virtual.model;
 
 import jakarta.persistence.*;
+import org.jspecify.annotations.Nullable;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 @SequenceGenerator(name = "seq_user", sequenceName = "seq_user", allocationSize = 1, initialValue = 1)
-public class User implements Serializable {
+public class User implements UserDetails {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    private static final long serialVerionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_user")
     private Long id;
 
-    @Column(nullable = false)
-    private String username;
-
-    @Column(nullable = false)
+    private String login;
     private String password;
+    private LocalDate currentPasswordDate;
 
-    @Column(nullable = false)
-    private String email;
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "acess_user", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "acess_id"},
+            name = "unique_acess_user"), joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id", table = "user", unique = false,
+            foreignKey = @ForeignKey(name = "user_fk", value = ConstraintMode.CONSTRAINT)), inverseJoinColumns = @JoinColumn(name = "acess_id", unique = false, referencedColumnName = "id", table = "acess", foreignKey = @ForeignKey(name = "acess_fk", value = ConstraintMode.CONSTRAINT)))
+    private List<Access> acess;
 
-    // Getters and setters
-    public Long getId() {
-        return id;
+    /*Autoridades são os acessos, ou seja ROLE_ADMIN. ROLE_SECRETARIO*/
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.acess;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
+    @Override
     public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    // equals and hashCode
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(id, user.id);
+        return this.password;
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
+    public String getUsername() {
+        return this.login;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

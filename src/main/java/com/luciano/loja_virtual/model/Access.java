@@ -3,6 +3,7 @@ package com.luciano.loja_virtual.model;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 
+import java.io.Serial;
 import java.util.Objects;
 
 @Entity
@@ -15,6 +16,7 @@ import java.util.Objects;
 )
 public class Access implements GrantedAuthority {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
